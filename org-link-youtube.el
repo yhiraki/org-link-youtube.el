@@ -3,9 +3,11 @@
 
 ;;; Code:
 
-(require 'ol)
-(require 'url)
 (require 'browse-url)
+(require 'ol)
+(require 'ol-info)
+(require 'ox)
+(require 'url)
 
 (defun org-link-youtube-get-video-id (url)
   "Get youtube video id from URL."
@@ -20,9 +22,7 @@
 
 (defun org-link-youtube-follow-link (path)
   "Open youtube PATH."
-  (if (string-match "^https://" path)
-      (browse-url path)
-    (browse-url (format "https://youtube.com/watch?v=%s" path))))
+  (browse-url (format "https://www.youtube.com/watch?v=%s" path)))
 
 (defvar org-link-youtube-export-html-format
   (concat "<iframe width=\"440\""
@@ -31,17 +31,13 @@
           " frameborder=\"0\""
           " allowfullscreen>%s</iframe>"))
 
-(defun org-link-youtube-export (path desc backend com)
+(defun org-link-youtube-export (path desc backend _com)
   "Doc."
-  (let* ((vid (org-link-youtube-get-video-id path))
-         (vid (if vid vid path)))
-    (cond
-     ((eq 'html backend)
-      (format org-link-youtube-export-html-format
-              vid ""))
-     (t
-      (org-export backend )
-      "hoge"))))
+  (pcase backend
+    ('html (format org-link-youtube-export-html-format path desc))
+    ('md (format "[%s](https://www.yotube.com/watch?v=%s)" desc path))
+    (_ (format "%s - %s" desc path)))
+  )
 
 (org-link-set-parameters
  "youtube"
